@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VenueAI - Smart Venue Assistant 🏟️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --user-bubble: #3b82f6;
+            --ai-bubble: #4c1d95;
+            --text-color: #f8fafc;
+            --input-bg: rgba(15, 23, 42, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: var(--user-bubble);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message {
+            background-color: var(--ai-bubble);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding: 10px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .quick-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .quick-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .input-area {
+            padding: 20px;
+            background: var(--input-bg);
+            border-top: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            box-sizing: border-box;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #3b82f6;
+        }
+
+        button.send-btn {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 0 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button.send-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .loading {
+            align-self: flex-start;
+            display: none;
+            gap: 4px;
+            padding: 12px 16px;
+            background-color: var(--ai-bubble);
+            border-radius: 20px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .error-message {
+            background-color: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>VenueAI - Smart Venue Assistant 🏟️</h1>
+    </header>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="message ai-message">
+            Hello! I'm VenueAI, your smart venue assistant. Ask me about wait times, shortcuts, or anything else you need!
+        </div>
+        <div class="loading" id="loadingIndicator">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <button class="quick-btn" onclick="sendQuickAction('Where is the nearest food stall?')">Nearest food stall?</button>
+        <button class="quick-btn" onclick="sendQuickAction('How to avoid crowd at main gate?')">Avoid crowd at main gate</button>
+        <button class="quick-btn" onclick="sendQuickAction('Nearest restroom?')">Nearest restroom?</button>
+        <button class="quick-btn" onclick="sendQuickAction('Emergency help')">🚨 Emergency help</button>
+        <button class="quick-btn" onclick="sendQuickAction('Lost and Found?')">Lost &amp; Found?</button>
+        <button class="quick-btn" onclick="sendQuickAction('What is the best parking exit route?')">Parking exit route?</button>
+        <button class="quick-btn" onclick="sendQuickAction('What is the event schedule today?')">Event schedule?</button>
+    </div>
+
+    <div class="input-area">
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+            <button class="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <footer style="text-align:center; padding: 12px; font-size: 0.8rem; color: rgba(255,255,255,0.4); border-top: 1px solid rgba(255,255,255,0.08);">
+        Powered by Google Gemini AI | PromptWars 2025
+    </footer>
+
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        function cleanText(text) {
+            // Remove **bold** markdown asterisks and show clean plain text
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '$1')
+                .replace(/\*(.*?)\*/g, '$1')
+                .replace(/#{1,6}\s/g, '')
+                .trim();
+        }
+
+        function appendMessage(text, isUser, isError = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            if (isError) msgDiv.classList.add('error-message');
+            msgDiv.textContent = isUser ? text : cleanText(text);
+            
+            chatContainer.insertBefore(msgDiv, loadingIndicator);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showLoading() {
+            loadingIndicator.style.display = 'flex';
+            scrollToBottom();
+        }
+
+        function hideLoading() {
+            loadingIndicator.style.display = 'none';
+        }
+
+        async function processQuestion(question) {
+            if (!question.trim()) return;
+
+            appendMessage(question, true);
+            userInput.value = '';
+            showLoading();
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: question })
+                });
+                
+                const data = await response.json();
+                hideLoading();
+
+                if (response.ok && data.response && !data.response.toString().startsWith("Error:")) {
+                    appendMessage(data.response, false);
+                } else {
+                    appendMessage(data.response || "An unexpected error occurred.", false, true);
+                }
+            } catch (error) {
+                hideLoading();
+                appendMessage("Network error. Please check your connection.", false, true);
+            }
+        }
+
+        function sendMessage() {
+            processQuestion(userInput.value);
+        }
+
+        function sendQuickAction(text) {
+            processQuestion(text);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
