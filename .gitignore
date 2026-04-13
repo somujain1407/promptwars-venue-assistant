@@ -1,15 +1,28 @@
 # Secret keys - NEVER push to GitHub
 .env
+*.env
+.env.*
+.env.local
+.env.production
 
 # Python cache
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 
-# Virtual environments
-.venv/
+# Virtual environment files
+Scripts/
+pyvenv.cfg
 venv/
+.venv/
 env/
+
+# Config files
+*.cfg
+
+# Log files
+*.log
 
 # Temp/debug files
 test_models.py
